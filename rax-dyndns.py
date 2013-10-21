@@ -26,20 +26,21 @@ def parse_arguments():
 #    parser.add_argument("--source", required = True, help = "The Account Number of the Source AWS Account for migration")
     #parser.add_argument("--domain", required = True, dest="domain", help = "Domain to update record on")
     parser.add_argument("--subdomain", required = True, dest="subdomain", help = "subdomain to update record on")
-    parser.add_argument("--debug", help = "Turn on boto debugging", dest = "debug", default = False, action = "store_true")
+    parser.add_argument("--override_ip", required = False, dest="override_ip", help = "If not given, IP supplied will be public facing address")
+    #parser.add_argument("--debug", help = "Turn on boto debugging", dest = "debug", default = False, action = "store_true")
     return parser.parse_args()
 
 if __name__ == "__main__":
 
     options = parse_arguments()
 
-    if options.debug:
-        boto.set_stream_logger('boto')
-
     subdom = options.subdomain
     fqdn = subdom.split(".")
     dom = fqdn[1]+"."+fqdn[2]
 
+    # If override IP was given
+    if options.override_ip:
+        my_ip = options.override_ip
 
 #acquire domains on account in list and set to public IP of home server
     domains = dns.list()
@@ -55,9 +56,11 @@ if __name__ == "__main__":
                     logging.debug(str(format_date) + "-- Updating record for " + str(rec.name) + " IP Address " + str(my_ip))
                     try:
                         rec.update(data=my_ip)
-                    except e:
-                        logging.error(e)
+                    except:
+                        logging.error("Failure to update DNS Records for %s" % subdom)
+                    else:
+                        logging.debug("Record Updated Successfully: %s" % subdom)
             if not rec_found:
                 #print "Record not found for %s" % subdomain
-                logging.debug("Record not found for %s" % subdomain)
+                logging.debug("Record not found for %s" % subdom)
 
