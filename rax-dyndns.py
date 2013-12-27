@@ -2,6 +2,7 @@
 
 import pyrax
 import urllib2
+import os
 import datetime
 import argparse
 import logging
@@ -11,9 +12,10 @@ logging.basicConfig(filename='rax-dyndns.log',level=logging.DEBUG)
 now = datetime.datetime.now()
 format_date = now.strftime("%y-%m-%d %H:%M")
 
-
+#Requires creds file, in home directory. Info: http://nullege.com/codes/search/pyrax.set_credential_file
+creds_file = os.path.expanduser("~/.rackspace_cloud_credentials")
 pyrax.settings.set('identity_type', 'rackspace')
-pyrax.set_credential_file(".rackspace_cloud_credentials")
+pyrax.set_credential_file(creds_file)
 
 #acquire public IP of home server
 my_ip = urllib2.urlopen('http://ip.42.pl/raw').read()
