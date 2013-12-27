@@ -86,13 +86,25 @@ if zone == nil
         :domain => domain, :email => options.adminemail)
 end
 
-#find record name
-rec = options.fqdn
-rec = zone.records.find {|z| z.record == rec}
-puts "Record found: #{rec}"
-
-#check if record exists already in zone
-zone.records.each do |record|
-    r = record.name.to_s
-    puts "Record: #{r}"
+#check if record already exists
+rec = zone.records.select{|record| record.name == options.fqdn}
+if rec == nil
+    puts "Record not found, creating"
+    zone.record.create(
+        :name => options.fqdn, :type => "A", :value => options.ip)
+else
+    puts "Record found, modifying existing record"
+    print rec.id
 end
+# #find record name
+# rec = options.fqdn
+# puts "Record found: #{rec}"
+
+# #check if record exists already in zone
+# zone.records.each do |record|
+#     if options.fqdn == record.name.to_s
+#         puts "Record already exists: #{r}"
+#         found = true
+#     end
+# end
+
